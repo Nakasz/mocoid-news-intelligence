@@ -36,11 +36,13 @@ The frontend reads:
 
 ## Schedule
 
-Production VPS cron currently updates the pipeline daily. Recommended single daily update schedule:
+Production VPS cron currently runs twice daily:
 
 ```cron
-0 18 * * * /home/ubuntu/news-recommender/daily_update.sh >> /home/ubuntu/news-recommender/cron.log 2>&1
+0 7,19 * * * /home/ubuntu/news-recommender/daily_update.sh >> /home/ubuntu/news-recommender/cron.log 2>&1
 ```
+
+This updates at 07:00 and 19:00 server time.
 
 ## Local usage
 
