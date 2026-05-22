@@ -24,7 +24,6 @@ The scraping and ranking pipeline lives in `scripts/`:
 - `scripts/daily_update.sh` — daily automation: scrape → rank → export → deploy.
 - `scripts/config.py` — source list, ranking weights, and LLM config.
 - `scripts/database.py` — SQLite storage layer.
-- `scripts/server.py` — optional local FastAPI server.
 
 ## Outputs
 

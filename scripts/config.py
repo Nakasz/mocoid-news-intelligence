@@ -124,6 +124,3 @@ LLM_CONFIG = {
     "enable_thinking": False,
 }
 
-# Server
-HOST = "0.0.0.0"
-PORT = 4200
