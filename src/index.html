@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mocoid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.06), transparent),
+                        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(99,102,241,0.05), transparent),
+                        #060b19;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 1rem;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: url('bg-doodle.jpg') center center / cover no-repeat;
+            opacity: 0.6;
+            pointer-events: none;
+            filter: saturate(0.9) brightness(0.88);
+        }
+        /* Extra depth layer over doodle — softened vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(ellipse 120% 100% at 50% 45%, transparent 55%, rgba(6,11,25,0.18) 100%);
+            pointer-events: none;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* ─── GLASS NAVBAR ─── */
+        .navbar {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(18px) saturate(1.2);
+            -webkit-backdrop-filter: blur(18px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0.4rem;
+            margin-bottom: 1.5rem;
+            gap: 0.4rem;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            position: relative;
+        }
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 5%; right: 5%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            pointer-events: none;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .nav-btn:hover {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .nav-btn.active {
+            background: rgba(59, 130, 246, 0.12);
+            color: white;
+            box-shadow:
+                0 0 20px rgba(59, 130, 246, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        /* ─── GLASS HEADER ─── */
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+        }
+        h1 svg { width: 26px; height: 26px; stroke: #f97316; filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.3)); }
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .stats {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px) saturate(1.2);
+            -webkit-backdrop-filter: blur(12px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.65);
+        }
+        .stat strong { color: #60a5fa; }
+
+        /* ─── GLASS ARTICLE CARDS ─── */
+        .article-list { display: flex; flex-direction: column; gap: 0.8rem; }
+
+        .article {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            position: relative;
+            isolation: isolate;
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-left-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        background 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .article::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            background: linear-gradient(
+                160deg,
+                rgba(255,255,255,0.035) 0%,
+                transparent 40%
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* Subtle glossy top edge reflection */
+        .article::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.25) 30%,
+                rgba(255,255,255,0.25) 70%,
+                transparent
+            );
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 28px;
+        }
+        .article:hover {
+            transform: translateY(-4px) scale(1.005);
+            box-shadow:
+                0 12px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .article-thumb {
+            width: 120px;
+            height: 80px;
+            border-radius: 16px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: rgba(51, 65, 85, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .article-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .article-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .article-title a {
+            color: inherit;
+            text-decoration: none;
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            background-position: 0% 50%;
+            transition: background-position 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .article-title a:hover,
+        .article-title a:active {
+            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 40%, #93c5fd 70%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            background-position: 100% 50%;
+        }
+
+        .article-subtitle {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 0.4rem;
+            line-height: 1.4;
+        }
+
+        .article-points {
+            margin-top: 0.4rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.5;
+        }
+        .article-points li {
+            list-style: none;
+            padding-left: 1em;
+            text-indent: -1em;
+        }
+        .article-points li::before {
+            content: "•";
+            color: rgba(96, 165, 250, 0.6);
+            margin-right: 0.4em;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.6rem;
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.45);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* ─── TAGS & BADGES ─── */
+        .score {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+        }
+        .source-tag {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.65);
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(4px);
+        }
+        .genre-tag {
+            background: rgba(96, 165, 250, 0.1);
+            color: rgba(147, 197, 253, 0.75);
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            border: 1px solid rgba(96, 165, 250, 0.06);
+            backdrop-filter: blur(4px);
+        }
+        .author-tag {
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* ─── TABS ─── */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Unread cards — slightly more presence to contrast with read */
+        .article:not(.article-read) {
+            border-color: rgba(255, 255, 255, 0.1);
+            border-left: 2px solid rgba(96, 165, 250, 0.25);
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        }
+        .article:not(.article-read):hover {
+            transform: translateY(-4px) scale(1.005);
+            border-color: rgba(255, 255, 255, 0.14);
+            border-left-color: rgba(96, 165, 250, 0.35);
+            box-shadow:
+                0 14px 40px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        /* ─── MARK AS READ ─── */
+        /* NO root card opacity — glass surface stays intact */
+        .article-read {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.04);
+            border-left: 2px solid rgba(255, 255, 255, 0.06);
+            transform: scale(0.995);
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        /* Keep glass ::before highlight visible but slightly softer */
+        .article-read::before {
+            background: linear-gradient(
+                160deg,
+                rgba(255,255,255,0.025) 0%,
+                transparent 35%
+            );
+        }
+        /* Keep glossy edge reflection */
+        .article-read::after {
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.15) 30%,
+                rgba(255,255,255,0.15) 70%,
+                transparent
+            );
+        }
+        .article-read:hover {
+            transform: scale(0.998) translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.06);
+            border-left-color: rgba(255, 255, 255, 0.1);
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.07),
+                inset 0 1px 0 rgba(255, 255, 255, 0.09);
+        }
+        .article-read .article-title a {
+            background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+        .article-read .article-title a:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(196,181,253,0.6) 40%, rgba(147,197,253,0.6) 70%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            background-position: 100% 50%;
+        }
+        .article-read .score {
+            background: rgba(100, 116, 139, 0.08);
+            color: rgba(148, 163, 184, 0.5);
+            border-color: rgba(100, 116, 139, 0.05);
+            box-shadow: none;
+        }
+        .article-read .article-points {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .article-read .article-points li::before {
+            color: rgba(148, 163, 184, 0.35);
+        }
+        .article-read .article-subtitle {
+            color: rgba(255, 255, 255, 0.42);
+        }
+        .article-read .article-meta {
+            color: rgba(255, 255, 255, 0.35);
+        }
+        .article-read .source-tag {
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.45);
+            border-color: rgba(255, 255, 255, 0.015);
+        }
+        .article-read .genre-tag {
+            background: rgba(96, 165, 250, 0.04);
+            color: rgba(147, 197, 253, 0.45);
+            border-color: rgba(96, 165, 250, 0.025);
+        }
+        .article-read .author-tag {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .article-read .article-thumb {
+            filter: saturate(0.3);
+            opacity: 0.75;
+            transition: filter 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .article-read:hover .article-thumb {
+            filter: saturate(0.5);
+            opacity: 0.85;
+        }
+        .read-badge { display: none; }
+        .read-toggle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.35);
+            padding: 0.1rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.62rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        .read-toggle:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.65);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .article-read .read-toggle {
+            background: rgba(34, 197, 94, 0.04);
+            border-color: rgba(34, 197, 94, 0.05);
+            color: rgba(74, 222, 128, 0.4);
+        }
+        .article-read .read-toggle:hover {
+            background: rgba(34, 197, 94, 0.08);
+            color: rgba(74, 222, 128, 0.65);
+        }
+
+        .hide-read-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px) saturate(1.2);
+            -webkit-backdrop-filter: blur(12px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.55);
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.01em;
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .hide-read-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .hide-read-btn.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.15);
+            color: rgba(147, 197, 253, 0.85);
+            box-shadow:
+                0 2px 12px rgba(59, 130, 246, 0.08),
+                inset 0 1px 0 rgba(147, 197, 253, 0.08);
+        }
+
+        .updated {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.7rem;
+        }
+        .empty {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* ─── PINNED SECTION ─── */
+        .pinned-section {
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .pinned-section.has-pins {
+            display: block;
+        }
+        .pinned-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 0.5rem 0.9rem;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .pinned-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .pinned-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: rgba(249, 115, 22, 0.8);
+        }
+        .pinned-header-left svg {
+            width: 13px;
+            height: 13px;
+        }
+        .pinned-count {
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .pinned-toggle-icon {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+        .pinned-section.collapsed .pinned-toggle-icon {
+            transform: rotate(-90deg);
+        }
+        .pinned-section.collapsed .pinned-list {
+            display: none;
+        }
+        .pinned-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        /* Pinned card accent */
+        .article-pinned {
+            border-left: 2px solid rgba(249, 115, 22, 0.4) !important;
+        }
+        .article-pinned .pin-indicator {
+            color: rgba(249, 115, 22, 0.6);
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .article-pinned .pin-indicator svg {
+            width: 11px;
+            height: 11px;
+        }
+
+        /* Pin toggle button */
+        .pin-toggle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.35);
+            padding: 0.1rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.62rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        .pin-toggle:hover {
+            background: rgba(249, 115, 22, 0.08);
+            color: rgba(249, 115, 22, 0.8);
+            border-color: rgba(249, 115, 22, 0.15);
+        }
+        .article-pinned .pin-toggle {
+            background: rgba(249, 115, 22, 0.06);
+            border-color: rgba(249, 115, 22, 0.1);
+            color: rgba(249, 115, 22, 0.7);
+        }
+        .article-pinned .pin-toggle:hover {
+            background: rgba(249, 115, 22, 0.12);
+            color: rgba(249, 115, 22, 0.9);
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 0.5rem; }
+            h1 { font-size: 1.3rem; }
+            .article {
+                padding: 1rem;
+                border-radius: 20px;
+            }
+            .article-title { font-size: 0.88rem; }
+            .article-thumb { width: 80px; height: 56px; border-radius: 12px; }
+            .navbar {
+                padding: 0.3rem;
+                gap: 0.25rem;
+            }
+            .nav-btn {
+                padding: 0.45rem 0.4rem;
+                font-size: 0.72rem;
+                min-width: 0;
+            }
+            .nav-btn i { width: 12px !important; height: 12px !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i data-lucide="eye"></i> Mocoid</h1>
+            <p class="subtitle">Berita politik Indonesia & esai Substack terkurasi</p>
+            <div class="stats">
+                <div class="stat">News ID: <strong id="newsCount">0</strong> artikel</div>
+                <div class="stat">News Inter: <strong id="newsinterCount">0</strong> artikel</div>
+                <div class="stat">Substack: <strong id="substackCount">0</strong> esai</div>
+                <button class="hide-read-btn" id="hideReadBtn" onclick="toggleHideRead()"><i data-lucide="eye-off" style="width:12px;height:12px"></i> <span>Sembunyikan dibaca</span></button>
+            </div>
+        </header>
+
+        <!-- Navbar -->
+        <nav class="navbar">
+            <button class="nav-btn active" data-tab="news" onclick="switchTab('news')">
+                <i data-lucide="newspaper" style="width:14px;height:14px;vertical-align:text-bottom"></i> News ID
+            </button>
+            <button class="nav-btn" data-tab="newsinter" onclick="switchTab('newsinter')">
+                <i data-lucide="globe-2" style="width:14px;height:14px;vertical-align:text-bottom"></i> News Inter
+            </button>
+            <button class="nav-btn" data-tab="substack" onclick="switchTab('substack')">
+                <i data-lucide="book-open" style="width:14px;height:14px;vertical-align:text-bottom"></i> Substack
+            </button>
+            <a href="https://kelasindo.vercel.app" target="_blank" rel="noopener" class="nav-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px">
+                <i data-lucide="globe" style="width:14px;height:14px"></i> Kelas Indo
+            </a>
+        </nav>
+
+        <!-- News Tab -->
+        <div id="tab-news" class="tab-content active">
+            <div class="pinned-section" id="newsPinnedSection">
+                <div class="pinned-header" onclick="togglePinnedCollapse('news')">
+                    <div class="pinned-header-left"><i data-lucide="pin"></i> Disematkan <span class="pinned-count" id="newsPinnedCount"></span></div>
+                    <span class="pinned-toggle-icon">▾</span>
+                </div>
+                <div class="pinned-list" id="newsPinnedList"></div>
+            </div>
+            <div class="article-list" id="newsArticles"></div>
+        </div>
+
+        <!-- News Inter Tab -->
+        <div id="tab-newsinter" class="tab-content">
+            <div class="pinned-section" id="newsinterPinnedSection">
+                <div class="pinned-header" onclick="togglePinnedCollapse('newsinter')">
+                    <div class="pinned-header-left"><i data-lucide="pin"></i> Disematkan <span class="pinned-count" id="newsinterPinnedCount"></span></div>
+                    <span class="pinned-toggle-icon">▾</span>
+                </div>
+                <div class="pinned-list" id="newsinterPinnedList"></div>
+            </div>
+            <div class="article-list" id="newsinterArticles"></div>
+        </div>
+
+        <!-- Substack Tab -->
+        <div id="tab-substack" class="tab-content">
+            <div class="pinned-section" id="substackPinnedSection">
+                <div class="pinned-header" onclick="togglePinnedCollapse('substack')">
+                    <div class="pinned-header-left"><i data-lucide="pin"></i> Disematkan <span class="pinned-count" id="substackPinnedCount"></span></div>
+                    <span class="pinned-toggle-icon">▾</span>
+                </div>
+                <div class="pinned-list" id="substackPinnedList"></div>
+            </div>
+            <div class="article-list" id="substackArticles"></div>
+        </div>
+
+        <p class="updated">Data news di-refresh otomatis dari VPS. Ranking berita oleh MiMo AI.</p>
+    </div>
+
+    <script>
+        let newsArticles = [];
+        let substackArticles = [];
+        let hideRead = false;
+
+        /* ─── PINNED HELPERS ─── */
+        function getPinnedArticles() {
+            try { return JSON.parse(localStorage.getItem('pinned_articles') || '[]'); }
+            catch { return []; }
+        }
+        function savePinnedArticles(ids) {
+            localStorage.setItem('pinned_articles', JSON.stringify([...new Set(ids)]));
+        }
+        function isArticlePinned(url) {
+            return getPinnedArticles().includes(articleId(url));
+        }
+        function pinArticle(url) {
+            const id = articleId(url), list = getPinnedArticles();
+            if (!list.includes(id)) { list.push(id); savePinnedArticles(list); }
+            renderAll();
+        }
+        function unpinArticle(url) {
+            const id = articleId(url);
+            savePinnedArticles(getPinnedArticles().filter(i => i !== id));
+            renderAll();
+        }
+        function togglePinnedCollapse(tab) {
+            const section = document.getElementById(tab + 'PinnedSection');
+            section.classList.toggle('collapsed');
+            localStorage.setItem('pinned_collapsed_' + tab, section.classList.contains('collapsed') ? '1' : '0');
+        }
+        function restorePinnedCollapse() {
+            ['news', 'newsinter', 'substack'].forEach(tab => {
+                if (localStorage.getItem('pinned_collapsed_' + tab) === '1') {
+                    document.getElementById(tab + 'PinnedSection').classList.add('collapsed');
+                }
+            });
+        }
+
+        /* ─── MARK AS READ HELPERS ─── */
+        function getReadArticles() {
+            try { return JSON.parse(localStorage.getItem('read_articles') || '[]'); }
+            catch { return []; }
+        }
+        function saveReadArticles(ids) {
+            localStorage.setItem('read_articles', JSON.stringify([...new Set(ids)]));
+        }
+        function articleId(url) {
+            return url.split('/').pop().replace(/[^a-z0-9_-]/gi, '').slice(0, 64) || btoa(url).slice(0, 32);
+        }
+        function markAsRead(url) {
+            const id = articleId(url), list = getReadArticles();
+            if (!list.includes(id)) { list.push(id); saveReadArticles(list); }
+            renderAll();
+        }
+        function unmarkAsRead(url) {
+            const id = articleId(url);
+            saveReadArticles(getReadArticles().filter(i => i !== id));
+            renderAll();
+        }
+        function isArticleRead(url) {
+            return getReadArticles().includes(articleId(url));
+        }
+        function toggleHideRead() {
+            hideRead = !hideRead;
+            document.getElementById('hideReadBtn').classList.toggle('active', hideRead);
+            renderAll();
+        }
+
+        let newsidArticles = [];
+        let newsinterArticles = [];
+
+        function renderAll() {
+            renderNewsArticles(newsidArticles);
+            renderNewsinterArticles(newsinterArticles);
+            renderSubstackArticles(substackArticles);
+            renderPinnedSection('news', newsidArticles);
+            renderPinnedSection('newsinter', newsinterArticles);
+            renderPinnedSection('substack', substackArticles);
+            lucide.createIcons();
+        }
+
+        function switchTab(name) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            document.querySelector(`.nav-btn[data-tab="${name}"]`).classList.add('active');
+        }
+
+        async function loadAll() {
+            try {
+                const [newsResp, interResp, substackResp] = await Promise.all([
+                    fetch('./articles.json'),
+                    fetch('./articles_inter.json'),
+                    fetch('./substack.json')
+                ]);
+                newsidArticles = await newsResp.json();
+                newsinterArticles = await interResp.json();
+                substackArticles = await substackResp.json();
+
+                document.getElementById('newsCount').textContent = newsidArticles.length;
+                document.getElementById('newsinterCount').textContent = newsinterArticles.length;
+                document.getElementById('substackCount').textContent = substackArticles.length;
+
+                renderAll();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('newsArticles').innerHTML = '<div class="empty">Gagal memuat data.</div>';
+                document.getElementById('newsinterArticles').innerHTML = '<div class="empty">Gagal memuat data.</div>';
+                document.getElementById('substackArticles').innerHTML = '<div class="empty">Gagal memuat data.</div>';
+            }
+            lucide.createIcons();
+        }
+
+        /* ─── NEWS ID ─── */
+        function renderNewsArticles(articles) {
+            renderArticleListGeneric(articles, 'newsArticles', 'Semua artikel sudah dibaca.');
+        }
+
+        /* ─── NEWS INTER ─── */
+        function renderNewsinterArticles(articles) {
+            renderArticleListGeneric(articles, 'newsinterArticles', 'Belum ada artikel internasional.');
+        }
+
+        function renderArticleListGeneric(articles, containerId, emptyMsg) {
+            const container = document.getElementById(containerId);
+            let filtered = articles.filter(a => !isArticlePinned(a.url));
+            if (hideRead) filtered = filtered.filter(a => !isArticleRead(a.url));
+            container.innerHTML = filtered.map(a => {
+                const read = isArticleRead(a.url);
+                const date = a.published ? new Date(a.published).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                const points = a.points ? `<ul class="article-points">${a.points.map(p => `<li>${p}</li>`).join('')}</ul>` : '';
+                const thumb = a.image ? `<img class="article-thumb" src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+                return `
+                <div class="article${read ? ' article-read' : ''}" data-url="${a.url}">
+                    ${read ? '<div class="read-badge"><i data-lucide="check" style="width:12px;height:12px"></i> Dibaca</div>' : ''}
+                    ${thumb}
+                    <div class="article-content">
+                        <div class="article-header">
+                            <div class="article-title"><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></div>
+                            <div class="score">${a.score}</div>
+                        </div>
+                        ${points}
+                        <div class="article-meta">
+                            <span class="source-tag">${a.source}</span>
+                            <span>${date}</span>
+                            <button class="read-toggle" onclick="event.stopPropagation();${read ? 'unmarkAsRead' : 'markAsRead'}('${a.url}')">${read ? 'Belum dibaca' : 'Tandai dibaca'}</button>
+                            <button class="pin-toggle" onclick="event.stopPropagation();pinArticle('${a.url}')">📌 Pin</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+            }
+        }
+
+        /* ─── SUBSTACK ─── */
+        function renderSubstackArticles(articles) {
+            const container = document.getElementById('substackArticles');
+            let filtered = articles.filter(a => !isArticlePinned(a.url));
+            if (hideRead) filtered = filtered.filter(a => !isArticleRead(a.url));
+            container.innerHTML = filtered.map(a => {
+                const read = isArticleRead(a.url);
+                const date = a.published ? new Date(a.published).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                const subtitle = a.subtitle ? `<div class="article-subtitle">${a.subtitle}</div>` : '';
+                const thumb = a.image ? `<img class="article-thumb" src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+                return `
+                <div class="article${read ? ' article-read' : ''}" data-url="${a.url}">
+                    ${read ? '<div class="read-badge"><i data-lucide="check" style="width:12px;height:12px"></i> Dibaca</div>' : ''}
+                    ${thumb}
+                    <div class="article-content">
+                        <div class="article-header">
+                            <div class="article-title"><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></div>
+                        </div>
+                        ${subtitle}
+                        <div class="article-meta">
+                            <span class="source-tag">${a.source}</span>
+                            ${a.genre ? `<span class="genre-tag">${a.genre}</span>` : ''}
+                            ${a.author ? `<span class="author-tag">${a.author}</span>` : ''}
+                            <span>${date}</span>
+                            <button class="read-toggle" onclick="event.stopPropagation();${read ? 'unmarkAsRead' : 'markAsRead'}('${a.url}')">${read ? 'Belum dibaca' : 'Tandai dibaca'}</button>
+                            <button class="pin-toggle" onclick="event.stopPropagation();pinArticle('${a.url}')">📌 Pin</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty">Semua esai sudah dibaca.</div>';
+            }
+        }
+
+        loadAll();
+        restorePinnedCollapse();
+
+        /* ─── PINNED SECTION RENDERER ─── */
+        function renderPinnedSection(tab, articles) {
+            const section = document.getElementById(tab + 'PinnedSection');
+            const list = document.getElementById(tab + 'PinnedList');
+            const countEl = document.getElementById(tab + 'PinnedCount');
+            const pinned = articles.filter(a => isArticlePinned(a.url));
+
+            if (pinned.length === 0) {
+                section.classList.remove('has-pins');
+                list.innerHTML = '';
+                return;
+            }
+
+            section.classList.add('has-pins');
+            countEl.textContent = `(${pinned.length})`;
+
+            list.innerHTML = pinned.map(a => {
+                const read = isArticleRead(a.url);
+                const date = a.published ? new Date(a.published).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                const points = a.points ? `<ul class="article-points">${a.points.map(p => `<li>${p}</li>`).join('')}</ul>` : '';
+                const thumb = a.image ? `<img class="article-thumb" src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+                const subtitle = a.subtitle ? `<div class="article-subtitle">${a.subtitle}</div>` : '';
+                const score = a.score ? `<div class="score">${a.score}</div>` : '';
+                return `
+                <div class="article article-pinned${read ? ' article-read' : ''}" data-url="${a.url}">
+                    ${read ? '<div class="read-badge"><i data-lucide="check" style="width:12px;height:12px"></i> Dibaca</div>' : ''}
+                    ${thumb}
+                    <div class="article-content">
+                        <div class="article-header">
+                            <div class="article-title"><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></div>
+                            ${score}
+                        </div>
+                        ${subtitle || ''}${points || ''}
+                        <div class="article-meta">
+                            <span class="source-tag">${a.source}</span>
+                            <span>${date}</span>
+                            <button class="read-toggle" onclick="event.stopPropagation();${read ? 'unmarkAsRead' : 'markAsRead'}('${a.url}')">${read ? 'Belum dibaca' : 'Tandai dibaca'}</button>
+                            <button class="pin-toggle" onclick="event.stopPropagation();unpinArticle('${a.url}')">📌 Lepas</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
